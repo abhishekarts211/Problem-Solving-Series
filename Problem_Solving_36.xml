@@ -1,0 +1,66 @@
+
+🔍 Problem Summary
+
+"Signature required" during SAML Single Logout (SLO) initiated by the Service Provider (SP).
+
+Although the LogoutRequest appears to include a <Signature> element, the IdP (PingFederate) rejects it, saying the signature is not present.
+
+🔬 Diagnosis & Root Cause
+The LogoutRequest uses HTTP-Redirect binding, which is a special case in SAML.
+
+According to the SAML Bindings specification (section 3.4.4.1(https://docs.oasis-open.org/security/saml/v2.0/saml-bindings-2.0-os.pdf)), when using Redirect binding, the signature MUST NOT be embedded inside the XML like in a typical POST binding.
+
+Instead, the signature must be:
+
+Base64-encoded
+
+Passed as a query parameter named Signature in the URL
+
+Accompanied by a SigAlg parameter
+
+Even though the LogoutRequest XML has a <ds:Signature> tag, PingFederate does not look for it there when using Redirect binding. It expects the signature in the URL query string.
+
+🔴 Mismatch: The SP sends the signature in the XML instead of in the URL, so PingFederate sees it as "missing", triggering the Signature required error.
+
+
+
+✅ Solution
+Option 1: Fix the SP’s Redirect Signature Implementation
+Make sure the SP implements SAML Redirect binding signatures properly:
+
+Use query string parameters:
+
+SAMLRequest
+
+RelayState (optional)
+
+SigAlg
+
+Signature
+
+Sign the URL string as per SAML Bindings Section 3.4.4.1
+
+This is the preferred and standards-compliant fix.
+
+Option 2: Switch to HTTP-POST Binding
+If the SP can't correctly implement Redirect signatures, you can:
+
+Reconfigure the SP and IdP to use HTTP-POST binding instead
+
+POST binding allows the signature to be embedded in the XML body using <ds:Signature>
+
+
+
+=======================================================================================================
+
+The correct form of a LogoutRequest over the Redirect binding is (as seen from the PingFederate server.log):
+
+REQUEST (GET) from 127.0.0.1: ---PARAMETERS---
+SigAlg:
+http://www.w3.org/2000/09/xmldsig#rsa-sha1
+SAMLRequest:
+fZJdb4IwFIb/Cuk935PMRkjM0IUEZxQ3F29MhaKd0FZO8WO/foBLZha3m140z/u8PScdACkLiWOxFbWa00NNQWlhczBOFBPcRzulJGDTLERKip0AhfuWa5ssk2YST4027yAtAqhpxEERrnzkWLarW57ueAvHxb0HbLmG5T2uGi70Ud7X4/XsfZJY8Yiv9tNDtYzneb5djzZIe6MVdL2OYSHtXBYccNvho7riWBBggDkpKWCV4mQ4iXEDYgJAq/a9txH5f0ZWQolUFCgYtDTuRqiCnzkzmpO6UJhyxdQlygbmLXcNvTTaKNTGoiqJ+rvPNuzuhmV63qG45iBpynJGMxR8iB3/tl+FV7vECYV2GxHP6DmQp4tYH+3PeXIiujtmZGTHzwWD5at7Df/i7zmGT7M0CzfpabFfeoaMxbTHHEHpsf+Hw7zzQYIv
+RelayState:
+di4n4KQMLyEhBjppRsSkig7BiqR9vd
+Signature:
+i0sTmzp6Dd2/M8n0Y3EzGdQstemeG+TdD4jQ0bZ6F8O8aMGeH6EHKq0fWVDJADiRa+kNOfdfR9dazKNxX6EkesmJLlAw5sCo2VY6VXCkZvuEU7474N8MKHRTHQCIZlrMmUgxtqwPzBHouXu19+AOVbbZy7im45aczWipTa06Axk=
