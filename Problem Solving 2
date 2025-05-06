@@ -1,0 +1,112 @@
+Problem Solving 2 : Signature Validation failed
+
+Troubleshooting “Signature Validation Failed” in PingFederate SSO config
+
+Common Causes
+=====================
+
+Mismatched Certificates
+------------------------
+
+The SP does not have the correct public key (certificate) of the IdP.
+
+The IdP changed its certificate and didn’t notify the SP.
+
+Metadata Not Updated
+--------------------
+
+SP or IdP is using outdated federation metadata.
+
+Recent metadata changes (like key rotation) weren’t propagated.
+
+Incorrect Signing Algorithm
+--------------------------------
+
+The IdP is using a signing algorithm not supported or not configured in the SP (e.g., RS512 vs RS256).
+
+Corrupt or Altered SAML Response
+-----------------------------------
+
+The response was tampered with or got corrupted in transit (e.g., whitespace issues or encoding anomalies).
+
+Relay State or ACS URL Mismatches
+----------------------------------
+
+Although not directly causing signature validation failure, mismatched request/response details can lead to indirectly related errors.
+
+
+
+
+Step-by-Step Troubleshooting Guide
+🔍 1. Review the PingFederate Logs
+
+server.log
+
+saml-trace.log
+
+audit.log
+
+
+📄 2. Verify the IdP Certificate
+Go to:
+
+PingFederate Admin Console > Identity Provider > IdP Connections > [Your Connection] > Signature Verification
+
+Ensure the public certificate (X.509) matches what the IdP is using to sign messages.
+
+Tip: If you receive metadata from the IdP, import it again to refresh keys.
+
+🔄 3. Update Metadata
+If your IdP provides a metadata URL or XML file:
+
+Re-import it in PingFederate:
+IdP Connections > Metadata > Import Metadata
+
+Make sure to check:
+
+entityID
+
+SingleSignOnService URL
+
+KeyDescriptor use="signing"
+
+🔧 4. Check Signing Settings
+Ask your IdP:
+
+Are they signing the assertion, the response, or both?
+
+Which algorithm are they using (e.g., SHA-1, SHA-256, SHA-512)?
+
+Ensure PingFederate is configured to accept the expected algorithm under:
+SP Connections > Signature Verification
+
+🧪 5. Use SAML Tracer Tools
+Use browser extensions like:
+
+SAML-tracer (Firefox/Chrome)
+
+Fiddler
+
+Download the SAML response and decode it (using tools like SAMLTool) to:
+
+Confirm signature presence
+
+Validate the certificate fingerprint
+
+Check for encoding errors
+
+🔁 6. Reproduce the Error in Lower Environments
+Try to replicate the flow in a staging or QA environment. This helps isolate whether it’s an environment-specific issue, such as an outdated certificate in just one PingFederate node.
+
+
+
+Preventive Best Practices
+Enable automatic metadata refresh if supported by your IdP.
+
+Set alerts for certificate expiry and rotate keys before expiration.
+
+Regularly test SSO flows post any update or certificate change.
+
+Maintain direct communication channels with external IdP/SP parties.
+
+
