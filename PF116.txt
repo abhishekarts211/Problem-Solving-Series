@@ -1,0 +1,21 @@
+
+PF 116
+
+
+Configuring an SMTP Notification Publisher instance at PingFederate (for Gmail)
+
+
+
+SMTP Server Settings Recap (for Gmail)
+
+Email Server: smtp.gmail.com
+
+SMTP Port: 587 (for STARTTLS) or 465 (for SSL/TLS)
+
+Encryption Method: Choose STARTTLS or SSL/TLS based on your preference.
+
+SMTPS Port: 465 (only needed if using SSL/TLS).
+
+Username: Your Gmail email address.
+
+Password: Get your App Password (https://myaccount.google.com/apppasswords)
