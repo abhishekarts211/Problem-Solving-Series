@@ -1,0 +1,34 @@
+Problem Solving 1 : Kerberos Failure 
+
+High-level review of how Kerberos authentication is working with PingFederate:
+
+
+A browser-based authentication request is sent to PingFederate.
+
+PingFederate invokes the Kerberos IdP adapter (or IWA IdP adapter) as configured (e.g., based on authentication policy).
+
+PingFederate responds with the WWW-Authenticate: Negotiate header, challenging the browser to provide a Kerberos or NTLM token.
+
+The browser queries DNS using the hostname to determine the Service Principal Name (SPN).
+
+Using the SPN, the operating system requests a service ticket from the Domain Controller/Key Distribution Center (DC/KDC) by exchanging the user's Ticket Granting Ticket (TGT).
+
+The DC/KDC returns the service ticket, which the browser includes in the request to PingFederate as the Authorization header.
+
+PingFederate validates the Kerberos token with the DC/KDC.
+
+Upon successful validation, PingFederate retrieves the user's identity from the token and completes the authentication process.
+
+
+=====================================
+
+
+How to Configure Browsers for Kerberos Authentication
+
+https://docs.cloudera.com/documentation/enterprise/5-12-x/topics/cdh_sg_browser_access_kerberos_protected_url.html
+
+https://docs.pingidentity.com/pingfederate/12.2/administrators_reference_guide/pf_config_end_user_browser.html
+
+
+
+
