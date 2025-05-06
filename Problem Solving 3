@@ -1,0 +1,57 @@
+Problem Solving 3 : Troubleshooting Page Expired Error
+
+Troubleshooting "Page Expired" Errors in PingFederate SSO Redirects
+
+Overview
+During Single Sign-On (SSO) flows with PingFederate, users may occasionally encounter a "Page Expired" error. This typically happens when PingFederate cannot find the session information it needs to continue the login process.
+
+Why Does This Happen?
+PingFederate relies on two key pieces of information to manage a user's session:
+
+Session Cookie – A small file stored in the user’s browser (usually named PF by default) that tracks session data.
+
+Resumable Nonce – A unique identifier for each session, embedded in the URL.
+For example, in this URL:
+https://<hostname>/idp/WDe3q/resumeSAML20/idp/startSSO.ping,
+the "WDe3q" part is the nonce.
+
+If either of these is missing or invalid, PingFederate can't proceed—and shows the "Page Expired" error page.
+
+Common Causes & Solutions
+1. Cookie Issues
+If the browser drops or blocks the PingFederate session cookie (PF) during the authentication flow, the session breaks.
+
+🔗 Page Expired error due to cookie issue (https://support.pingidentity.com/s/article/Page-Expired-error-due-to-cookie-issue)
+
+2. HTML Form Double Submission
+Sometimes users might click the login button more than once, causing the form to be submitted multiple times. This can confuse PingFederate and cause the session to expire.
+
+Note: While this usually happens with the HTML Form IdP Adapter, it can occur with other setups too.
+
+🔗 Page Expired due to double form submission (https://support.pingidentity.com/s/article/Page-Expired-due-to-double-HTML-Form-submission)
+
+3. HTML Form State Expiry
+If users spend too long on the login page before clicking "submit", the session state may expire before PingFederate can process it.
+
+🔗 Page Expired Error After Extended Time on Login Page (https://support.pingidentity.com/s/article/Page-Expired-Error-After-Extended-Time-on-Login-Page)
+
+4. Multiple Simultaneous Authentication Requests
+If a user opens several SSO links at once (e.g., in multiple browser tabs), it can cause conflicts that lead to the Page Expired error.
+
+🔗 Intermittent Page Expired errors due to multiple browser tabs(https://support.pingidentity.com/s/article/Intermittent-Page-Expired-errors-due-to-multiple-browser-tabs)
+
+5. Clustering Issues
+In rare cases, a problem in communication between nodes in a PingFederate cluster may cause session data to get lost.
+
+🔗 Page Expired error due to clustering issues(https://support.pingidentity.com/s/article/Page-Expired-error-due-to-clustering-issues)
+
+6. State Purged Before Expiry
+Even if the session hasn't technically expired, it can be purged early from the server's state table. This is uncommon, but it can still lead to a Page Expired error.
+
+🔗 Page Expired error due to state purging (https://support.pingidentity.com/s/article/Page-Expired-error-due-to-state-purging)
+
+7. Bookmarking In-Flight URLs
+If a user bookmarks a resume URL or shares it as a way to start an SSO login, PingFederate will reject it as the session state is no longer valid.
+
+🔗 Page Expired from bookmarking in-flight URLs
+
