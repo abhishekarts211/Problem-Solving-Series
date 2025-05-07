@@ -1,0 +1,127 @@
+Problem Solving 8 : PingID Loop Intermittent Issue
+
+
+Problem Statement
+Multiple users intermittently encountered an MFA loop that prevented access to SSO-based applications integrated with PingID. 
+The issue manifested as an inability to complete authentication, where users were repeatedly redirected to the MFA registration portal, even if already registered.
+
+Incident Timeline & Observations
+Initial Reports – Incidents raised by a user facing PingID authentication issues.
+
+The issue resolved itself within a minute, pointing to a potential network-level glitch.
+
+Later the same day, a Senior Director reported similar behavior—being redirected to the MFA portal after PingID failure.
+
+Early Investigation
+PingFederate server logs indicated:
+
+Cannot connect to authenticator endpoint (authenticator.pingone.com)
+
+PingID service status was operational at the time.
+
+Based on the system design, if PingID is unreachable, PingFederate redirects to the MFA registration portal.
+
+For registered users, this causes a loop, as they have no registration step to complete.
+
+Escalation & Multi-Team Involvement
+
+Multiple teams involved:
+
+SSO Operations
+Network & Perimeter Security
+Ping Identity Support
+
+Network team confirmed no issue on network path between:
+
+Source: PingFederate on-prem servers
+Destination: PingID (authenticator.pingone.com)
+
+
+Major Incident logged
+
+Problem Record opened for root cause analysis
+
+Technical Investigation and Data Collection
+
+What Was Gathered:
+
+CSD Files from PingFederate
+Server logs with SSL debug: -Djavax.net.debug=all
+Rolling Wireshark captures
+Kibana reports showing failure patterns across QA & PROD
+Java connectivity probe:
+Custom Java program hitting PingID heartbeat endpoint every 30 seconds
+Captured intermittent connectivity drop
+NIC Status Reports (netstat -e) before and after incidents
+Firewall traffic validation
+SSL Interception check – ruled out by perimeter team
+Java version and cert path validation
+
+Findings From Ping Identity Investigation
+
+What Was Ruled Out:
+
+No issue with PingID or PingOne infrastructure
+No problem on the PingFederate Java/OS/NIC layer
+No handshake or cipher suite mismatch
+No SSL interception in outbound traffic
+No packet loss or NIC congestion on PF side
+Handshake failures started early (ClientHello sent → RST received)
+
+What Was Discovered
+
+Wireshark captures revealed:
+
+ClientHello sent from PF server
+No ServerHello received
+Instead, RST (Reset) packets sent back to PF
+
+The RST was not from PingID, but from an intermediate device within infrastructure
+The Cisco Nexus device (identified by MAC) issued the RST, not PingID
+The same failure reproduced in QA and PROD, both using shared infra
+
+
+Root Cause Analysis (RCA)
+
+🔍 Root Cause Summary
+
+A firewall rule removal during a routine cleanup caused intermittent blocking of PingID traffic.
+
+Detailed RCA:
+
+PingID object group (GLB_PINGID_Authentication) removed from https-allowed group
+Automation script misidentified PingID as unused due to a bug, and the object was removed during firewall cleanup under Change Request.
+
+Change was executed successfully and removed 829 objects, including PingID
+
+Misidentification occurred because PingID was treated as a single IP instead of a load-balanced set
+
+No recent hits were seen on that specific IP in the last 60 days → marked as unused
+
+Resolution:
+
+Firewall team restored the PingID object group into the https-allowed group
+Verified communication between PF and PingID resumed
+No further MFA loop incidents observed post fix
+
+Lessons Learned & Recommendations
+
+
+📌 Future Prevention
+Review and enhance firewall cleanup automation scripts:
+
+Add logic to treat PingID and other load-balanced or CDN-based services properly
+
+Introduce approval workflows for removing security objects used in authentication
+
+Conduct controlled simulations before executing production rule changes
+
+
+
+Conclusion:
+
+The PingID MFA loop issue was caused by a firewall misconfiguration due to faulty automation logic during a cleanup activity. 
+This led to intermittent resets of SSL connections between PingFederate and PingID, which resulted in login loops. 
+The issue was resolved after 13 days of cross-functional investigation and restoration of the removed firewall objects.
+
+
