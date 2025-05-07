@@ -1,0 +1,28 @@
+Problem Solving 4 : Getting 403 at OpenID userinfo endpoint
+
+Problem Statement: OIDC Integration – UserInfo Endpoint Failing with 403 Error
+During the implementation of Single Sign-On (SSO) using OpenID Connect (OIDC), the vendor successfully completes the authorization code flow up to obtaining the access token. However, the request to the userinfo endpoint fails with an HTTP 403 Forbidden error.
+
+Observations:
+Authorization Code: ✅ Successful
+
+Access Token Retrieval: ✅ Successful
+
+Call to userinfo endpoint: ❌ Fails with HTTP 403
+
+This indicates the access token might lack the necessary scope or permissions to access the userinfo endpoint.
+
+Root Cause
+The issue was caused by an incorrect or incomplete scope parameter in the initial authorization request. Specifically, the required scopes to access user claims (openid, profile, and email) were either missing or misspelled.
+
+Solution
+Ensure that the authorization request URL includes the correct and complete scopes. For access to the userinfo endpoint, the openid scope is mandatory, and additional scopes like profile and email are needed to fetch corresponding user claims.
+
+✅ Correct Format:
+https://<host-address>/as/authorization.oauth2?client_id=<client-id>&response_type=code&scope=openid%20profile%20email
+
+❌ Incorrect Format (e.g., typo or case mismatch in scope):
+https://<host-address>/as/authorization.oauth2?client_id=<client-id>&response_type=code&Scope=openid%20profile%20email
+
+Note: The parameter name scope is case-sensitive and must be spelled correctly. Also, all required scopes must be included without typos.
+
