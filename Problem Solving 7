@@ -1,5 +1,6 @@
 Problem Solving 7: Cookie Domain Conflict in PingFederate – Managing PF Cookie Duplication Across Hosts
 
+
 Introduction
 PingFederate uses cookies to manage and maintain user sessions. These cookies play a vital role in ensuring secure and consistent authentication flows. However, when managing multiple virtual hosts or domains, misconfiguration of cookie domain settings in session-cookie-config.xml can lead to duplicate cookies and unpredictable behavior.
 
@@ -79,7 +80,7 @@ Once the fix is applied:
 PingFederate sets the cookie using the defined domain:
 
 
-Set-Cookie: PF-Prod=aDfPx6uwbbWGFhwE6zEhEG; Domain=.gsk.com; Path=/; Secure; HttpOnly
+Set-Cookie: PF-Prod=aDfPx6uwbbWGFhwE6zEhEG; Domain=.abc.com; Path=/; Secure; HttpOnly
 Only one PF cookie will be used across all relevant hosts.
 
 Session handling becomes stable and predictable.
