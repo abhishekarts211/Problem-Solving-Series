@@ -1,0 +1,23 @@
+Problem Solving 11 : Signature didn't validate against the credential's key 
+
+
+Problem Statement:
+
+During SSO configuration, the system fails to validate the SAML response signature against the credential's key, resulting in a persistent validation error. 
+Initially, the signature algorithm was updated from RSA-SHA1 to RSA-SHA256 in an attempt to resolve the issue. However, the error remained unresolved.
+
+Error Details:
+
+Caused by: org.opensaml.xml.validation.ValidationException: Signature did not validate against the credential's key
+	at org.opensaml.xml.signature.SignatureValidator.validate(SignatureValidator.java:79)
+	at ch.nevis.esauth.auth.states.saml.util.Verifier.verifyXMLSignature(Verifier.java:714)
+
+
+
+Solution:
+
+Navigate to Digital Signature Settings under the SSO connection configuration.
+Set "Include Certificate in keyInfo" to True.
+
+This ensures that the SAML response includes the certificate in the signature's KeyInfo element, enabling proper validation of the signature against the credential’s key.
+
