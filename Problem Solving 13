@@ -1,0 +1,59 @@
+Problem Solving 13 : Infinite Loop post authentication
+
+Problem Statement:
+After successful authentication in the application, users are redirected back to the login page or the authentication endpoint repeatedly, resulting in an infinite loop. 
+This behavior prevents users from accessing the intended resource or home page after login.
+
+The issue typically occurs due to missing or incorrect handling of session state, tokens, or redirect URLs after authentication. 
+Instead of routing the user to the intended destination, the application re-triggers the authentication process, creating a continuous loop.
+
+Possible Causes:
+
+Session or Token Not Persisted:
+The authentication response is successful, but the session or token is not stored correctly, causing the system to think the user is unauthenticated.
+
+Missing Redirect URI or Default Landing Page:
+The application does not have a proper post-login redirect URI, sending the user back to the login page instead.
+
+Incorrect Configuration in Authentication Provider (e.g., SAML, OAuth):
+Mismatch or misconfiguration in SSO settings (e.g., ACS URL, RelayState, callback URL) may lead to failed or misrouted post-login flows.
+
+Client-Side Issues (Cookies or Local Storage):
+Session cookies or tokens are not being stored due to browser settings, domain mismatches, or misconfigured SameSite attributes.
+
+
+Solution:
+✅ Step 1: Verify Authentication Response
+Confirm that the authentication provider (e.g., Identity Provider, OAuth Server) returns a valid token or SAML assertion.
+
+Use browser dev tools or logs to inspect the response.
+
+✅ Step 2: Check Session/Token Persistence
+Ensure that the session or token is properly stored on the client (e.g., cookies, localStorage).
+
+Check for any client-side restrictions (e.g., browser blocks third-party cookies).
+
+✅ Step 3: Review Post-Login Redirect Logic
+Confirm the application is correctly redirecting to a valid and accessible URL after authentication.
+
+If using SSO, verify that RelayState or post-login redirect URIs are correctly set.
+
+✅ Step 4: Inspect Application Logs
+Look for authentication success followed by unexpected redirects or 302 loops.
+
+Logs often reveal missing session data or failed state restoration.
+
+✅ Step 5: Adjust Load Balancer or Proxy Configurations (if any)
+Ensure sticky sessions or session persistence are correctly configured.
+
+Check for any reverse proxy headers that may affect authentication routing.
+
+✅ Example Fix:
+For a SAML-based SSO loop issue:
+
+Ensure ACS (Assertion Consumer Service) URL is correct.
+
+Include RelayState during login initiation and correctly handle it on return.
+
+Set 'Include Certificate in keyInfo' to true, if signature validation fails.
+
