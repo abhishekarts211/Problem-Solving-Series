@@ -1,0 +1,33 @@
+Problem Solving 12 : Stickiness session in AWS
+
+
+Problem Statement:
+In an AWS environment, session stickiness (also known as session affinity) is configured on the load balancer to maintain user sessions by directing 
+requests from the same client to the same target. The load balancer achieves this by issuing a cookie with a defined stickiness duration.
+
+Currently, the stickiness duration is set to 8 hours. After this period, the cookie expires, and the session is no longer sticky. 
+This can lead to inconsistent user experience or session-related issues for long-running sessions, especially in applications that expect persistent 
+connections beyond the configured time frame.
+
+
+
+Solution:
+
+To maintain stickiness for longer sessions or prevent session drops:
+
+
+Adjust the Stickiness Duration:
+
+Navigate to your AWS Load Balancer settings.
+
+Under the target group associated with the load balancer, locate the Stickiness settings.
+
+Increase the duration based on your application’s session requirements (e.g., more than 8 hours if needed).
+
+
+Use Application-Controlled Session Stickiness (Optional):
+
+Instead of relying solely on the load balancer, configure your application to manage its own session affinity using custom cookies.
+
+This provides more control and flexibility over session management logic.
+
